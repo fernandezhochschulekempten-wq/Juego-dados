@@ -5,20 +5,22 @@
 <title>Juego de Verbos - Dado Digital</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body { font-family: 'Poppins', sans-serif; text-align:center; margin:20px; background:#f5f5f5; color:#333; }
-  h1 { color: #1a73e8; margin-bottom:10px; }
+  body { font-family: 'Poppins', sans-serif; text-align:center; margin:0; padding:20px; background:#f0f4f8; color:#333; }
+  h1 { color: #1a73e8; margin-bottom:5px; }
   #instruccion { font-size:16px; margin-bottom:20px; }
-  #dado { font-size:70px; cursor:pointer; margin-top:10px; transition: transform 0.2s; }
+  #dado { font-size:80px; cursor:pointer; margin-top:10px; transition: transform 0.2s; }
   #dado:hover { transform: scale(1.2); }
+  #verbo { font-size:22px; margin-top:15px; font-weight:500; }
   input { font-size:16px; padding:10px; margin-top:10px; border-radius:5px; border:1px solid #ccc; width:250px; }
-  button { font-size:16px; padding:8px 15px; margin-left:5px; border-radius:5px; border:none; background:#1a73e8; color:white; cursor:pointer; transition: background 0.2s; }
+  button { font-size:16px; padding:10px 20px; margin-left:5px; border-radius:5px; border:none; background:#1a73e8; color:white; cursor:pointer; transition: background 0.2s; }
   button:hover { background:#1558b0; }
   #feedback { font-size:18px; margin-top:10px; min-height:24px; }
-  #puntos { font-size:20px; margin-top:20px; }
-  .equipo1 { color: #1a73e8; font-weight:600; }
-  .equipo2 { color: #e91e63; font-weight:600; }
-  #turno { font-size:18px; margin-top:10px; font-weight:600; }
-  #verbo { font-size:20px; margin-top:15px; font-weight:500; }
+  #puntos { font-size:22px; margin-top:20px; font-weight:600; }
+  .equipo1 { color: #1a73e8; }
+  .equipo2 { color: #e91e63; }
+  #turno { font-size:20px; margin-top:15px; font-weight:600; }
+  #temporizador { font-size:28px; margin-top:10px; font-weight:600; color:#ff5722; }
+  .card { background:white; padding:20px; border-radius:10px; display:inline-block; box-shadow:0 4px 10px rgba(0,0,0,0.1); margin-top:10px; }
 </style>
 </head>
 <body>
@@ -26,22 +28,23 @@
 <h1>Juego Interactivo de Verbos (-AR)</h1>
 
 <p id="instruccion">
-<span style="font-weight:600;">Anleitung auf Deutsch:</span> <br>
-Jedes Team würfelt nacheinander mit dem Würfel 🎲. Ein Verb und ein Pronomen erscheinen. <br>
-Das Team muss das Verb korrekt im Präsens konjugieren. <br>
-Für richtige Antworten gibt es Punkte. Das Spiel wechselt automatisch zum nächsten Team. <br>
-Antworten können während der gesamten Zeit versucht werden.
+<span style="font-weight:600;">Anleitung auf Deutsch:</span><br>
+Haz clic en el dado 🎲 para obtener un verbo y un pronombre. Conjuga correctamente. <br>
+Los puntos se acumulan automáticamente. La solución solo aparece al terminar el tiempo.
 </p>
 
-<p id="turno">Turno: Equipo 1</p>
-<div id="dado">🎲</div>
-<p id="verbo"></p>
-<input type="text" id="respuesta" placeholder="Escribe la conjugación">
-<button onclick="checar()">Comprobar</button>
-<p id="feedback"></p>
+<div class="card">
+  <p id="turno">Turno: Equipo 1</p>
+  <p id="temporizador">Tiempo: 30s</p>
+  <div id="dado">🎲</div>
+  <p id="verbo"></p>
+  <input type="text" id="respuesta" placeholder="Escribe la conjugación">
+  <button onclick="checar()">Comprobar</button>
+  <p id="feedback"></p>
+</div>
 
-<h3>Puntos por equipo</h3>
-<p id="puntos"><span class="equipo1">Equipo 1: 0</span> | <span class="equipo2">Equipo 2: 0</span></p>
+<h3>Puntos</h3>
+<div class="card" id="puntos"><span class="equipo1">Equipo 1: 0</span> | <span class="equipo2">Equipo 2: 0</span></div>
 
 <script>
 const verbos = ["hablar","trabajar","estudiar","viajar","visitar","pasar las vacaciones","comprar","escuchar música"];
@@ -59,46 +62,38 @@ const conjugaciones = {
 
 let verboActual = "";
 let pronombreActual = "";
-let puntosEquipos = { "Equipo 1":0, "Equipo 2":0 };
+let puntos = { "Equipo 1":0, "Equipo 2":0 };
 let turno = 1; 
 let tiempoRestante = 30;
 let timer;
 
-// Iniciar turno (temporizador)
+// Iniciar turno
 function iniciarTurno(){
   clearInterval(timer);
   tiempoRestante = 30;
-  document.getElementById("turno").innerText = `Turno: Equipo ${turno} (Tiempo: ${tiempoRestante}s)`;
+  document.getElementById("temporizador").innerText = `Tiempo: ${tiempoRestante}s`;
   timer = setInterval(() => {
     tiempoRestante--;
-    document.getElementById("turno").innerText = `Turno: Equipo ${turno} (Tiempo: ${tiempoRestante}s)`;
+    document.getElementById("temporizador").innerText = `Tiempo: ${tiempoRestante}s`;
     if(tiempoRestante <=0){
       mostrarSolucionYCambiarTurno();
     }
   },1000);
 }
 
-// Mostrar solución y cambiar turno al terminar el tiempo
+// Mostrar solución al terminar tiempo
 function mostrarSolucionYCambiarTurno(){
   clearInterval(timer);
   if(verboActual){
     const index = pronombres.indexOf(pronombreActual);
     document.getElementById("feedback").innerText = 
       `⏱️ Tiempo terminado. La forma correcta era: ${conjugaciones[verboActual][index]}`;
-  } else {
-    document.getElementById("feedback").innerText = `⏱️ Tiempo terminado. Siguiente equipo.`;
   }
-
-  // Cambiar turno
-  turno = turno === 1 ? 2 : 1;
   verboActual = "";
   pronombreActual = "";
   document.getElementById("verbo").innerText = "";
   document.getElementById("respuesta").value = "";
-
-  setTimeout(() => {
-    document.getElementById("feedback").innerText = "";
-  }, 3000);
+  setTimeout(()=>{ document.getElementById("feedback").innerText=""; },3000);
 }
 
 // Dado digital
@@ -109,7 +104,7 @@ document.getElementById("dado").onclick = function(){
   document.getElementById("verbo").innerText = `Conjuga: ${pronombreActual} + ${verboActual}`;
   document.getElementById("feedback").innerText = "";
   document.getElementById("respuesta").value = "";
-  iniciarTurno(); // ⚡ inicia temporizador al hacer clic en el dado
+  iniciarTurno();
 };
 
 // Comprobar respuesta
@@ -117,36 +112,27 @@ function checar(){
   if(!verboActual) return;
   const r = document.getElementById("respuesta").value.toLowerCase().trim();
   const index = pronombres.indexOf(pronombreActual);
-  const equipo = `Equipo ${turno}`;
-  const correcto = r === conjugaciones[verboActual][index];
-
-  if(correcto){
-    puntosEquipos[equipo]++;
-    document.getElementById("feedback").innerText = `✅ ¡Correcto! +1 punto para ${equipo}`;
+  if(r === conjugaciones[verboActual][index]){
+    puntos[`Equipo ${turno}`]++;
+    document.getElementById("feedback").innerText = `✅ ¡Correcto! +1 punto`;
     actualizarPuntos();
+    mostrarSolucionYCambiarTurno();
     cambiarTurno();
   } else {
-    document.getElementById("feedback").innerText = `❌ Intenta otra vez`; // no mostrar solución
+    document.getElementById("feedback").innerText = `❌ Intenta otra vez`;
   }
 }
 
-// Actualiza puntuaciones
+// Actualiza puntos
 function actualizarPuntos(){
-  document.getElementById("puntos").innerHTML = 
-    `<span class="equipo1">Equipo 1: ${puntosEquipos["Equipo 1"]}</span> | <span class="equipo2">Equipo 2: ${puntosEquipos["Equipo 2"]}</span>`;
+  document.getElementById("puntos").innerHTML = `<span class="equipo1">Equipo 1: ${puntos["Equipo 1"]}</span> | <span class="equipo2">Equipo 2: ${puntos["Equipo 2"]}</span>`;
 }
 
-// Cambiar turno manual
+// Cambiar turno
 function cambiarTurno(){
-  clearInterval(timer);
   turno = turno === 1 ? 2 : 1;
-  verboActual = "";
-  pronombreActual = "";
-  document.getElementById("verbo").innerText = "";
-  document.getElementById("respuesta").value = "";
-  document.getElementById("feedback").innerText = "";
+  document.getElementById("turno").innerText = `Turno: Equipo ${turno}`;
 }
-
 </script>
 </body>
 </html>
