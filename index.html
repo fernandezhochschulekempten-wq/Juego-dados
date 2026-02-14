@@ -64,7 +64,7 @@ let turno = 1;
 let tiempoRestante = 30;
 let timer;
 
-// Iniciar turno
+// Iniciar turno (temporizador)
 function iniciarTurno(){
   clearInterval(timer);
   tiempoRestante = 30;
@@ -78,7 +78,7 @@ function iniciarTurno(){
   },1000);
 }
 
-// Mostrar solución solo al terminar el tiempo
+// Mostrar solución y cambiar turno al terminar el tiempo
 function mostrarSolucionYCambiarTurno(){
   clearInterval(timer);
   if(verboActual){
@@ -89,6 +89,7 @@ function mostrarSolucionYCambiarTurno(){
     document.getElementById("feedback").innerText = `⏱️ Tiempo terminado. Siguiente equipo.`;
   }
 
+  // Cambiar turno
   turno = turno === 1 ? 2 : 1;
   verboActual = "";
   pronombreActual = "";
@@ -97,7 +98,6 @@ function mostrarSolucionYCambiarTurno(){
 
   setTimeout(() => {
     document.getElementById("feedback").innerText = "";
-    iniciarTurno();
   }, 3000);
 }
 
@@ -109,6 +109,7 @@ document.getElementById("dado").onclick = function(){
   document.getElementById("verbo").innerText = `Conjuga: ${pronombreActual} + ${verboActual}`;
   document.getElementById("feedback").innerText = "";
   document.getElementById("respuesta").value = "";
+  iniciarTurno(); // ⚡ inicia temporizador al hacer clic en el dado
 };
 
 // Comprobar respuesta
@@ -135,7 +136,7 @@ function actualizarPuntos(){
     `<span class="equipo1">Equipo 1: ${puntosEquipos["Equipo 1"]}</span> | <span class="equipo2">Equipo 2: ${puntosEquipos["Equipo 2"]}</span>`;
 }
 
-// Cambiar turno manual después de respuesta correcta
+// Cambiar turno manual
 function cambiarTurno(){
   clearInterval(timer);
   turno = turno === 1 ? 2 : 1;
@@ -144,12 +145,8 @@ function cambiarTurno(){
   document.getElementById("verbo").innerText = "";
   document.getElementById("respuesta").value = "";
   document.getElementById("feedback").innerText = "";
-  iniciarTurno();
 }
 
-// Iniciar juego
-iniciarTurno();
 </script>
-
 </body>
 </html>
