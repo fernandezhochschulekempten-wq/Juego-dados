@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Juego de Verbos - Dado Digital</title>
+<style>
+  body { font-family: sans-serif; text-align:center; margin:20px; }
+  h1 { color: #2c3e50; }
+  #instruccion { font-size:16px; margin-bottom:20px; }
+  #dado { font-size:60px; cursor:pointer; margin-top:10px; }
+  input { font-size:16px; padding:5px; margin-top:10px; }
+  button { font-size:16px; padding:5px 10px; margin-left:5px; }
+  #feedback { font-size:18px; margin-top:10px; }
+  #puntos { font-size:20px; margin-top:20px; }
+  .equipo1 { color: blue; }
+  .equipo2 { color: red; }
+  #turno { font-size:18px; margin-top:10px; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<h1>Juego Interactivo de Verbos (-AR)</h1>
+
+<p id="instruccion">
+<span style="font-weight:bold;">Anleitung auf Deutsch:</span> <br>
+Jedes Team würfelt nacheinander mit dem Würfel 🎲. Ein Verb und ein Pronomen erscheinen. <br>
+Das Team muss das Verb korrekt im Präsens konjugieren. <br>
+Für richtige Antworten gibt es Punkte. Das Spiel wechselt automatisch zum nächsten Team.
+</p>
+
+<p id="turno">Turno: Equipo 1</p>
+<div id="dado">🎲</div>
+<p id="verbo"></p>
+<input type="text" id="respuesta" placeholder="Escribe la conjugación">
+<button onclick="checar()">Comprobar</button>
+<button onclick="hablar()">🎤 Responder por voz</button>
+<p id="feedback"></p>
+<h3>Puntos por equipo</h3>
+<p id="puntos"><span class="equipo1">Equipo 1: 0</span> | <span class="equipo2">Equipo 2: 0</span></p>
+
+<script>
+const verbos = ["hablar","trabajar","estudiar","viajar","visitar","pasar las vacaciones","comprar","escuchar música"];
+const pronombres = ["yo","tú","él/ella","nosotros","vosotros","ellos/ellas"];
+const conjugaciones = {
+  "hablar":["hablo","hablas","habla","hablamos","habláis","hablan"],
+  "trabajar":["trabajo","trabajas","trabaja","trabajamos","trabajáis","trabajan"],
+  "estudiar":["estudio","estudias","estudia","estudiamos","estudiáis","estudian"],
+  "viajar":["viajo","viajas","viaja","viajamos","viajáis","viajan"],
+  "visitar":["visito","visitas","visita","visitamos","visitáis","visitan"],
+  "pasar las vacaciones":["paso las vacaciones","pasas las vacaciones","pasa las vacaciones","pasamos las vacaciones","pasáis las vacaciones","pasan las vacaciones"],
+  "comprar":["compro","compras","compra","compramos","compráis","compran"],
+  "escuchar música":["escucho música","escuchas música","escucha música","escuchamos música","escucháis música","escuchan música"]
+};
+
+let verboActual = "";
+let pronombreActual = "";
+let puntosEquipos = { "Equipo 1":0, "Equipo 2":0 };
+let turno = 1; 
+let tiempoRestante = 30;
+let timer;
+
+function iniciarTurno(){
+  clearInterval(timer);
+  tiempoRestante = 30;
+  document.getElementById("turno").innerText = `Turno: Equipo ${turno} (Tiempo: ${tiempoRestante}s)`;
+  timer = setInterval(() => {
+    tiempoRestante--;
+    document.getElementById("turno").innerText = `Turno: Equipo ${turno} (Tiempo: ${tiempoRestante}s)`;
+    if(tiempoRestante <=0){
+      cambiarTurno();
+    }
+  },1000);
+}
+
+function cambiarTurno(){
+  clearInterval(timer);
+  turno = turno === 1 ? 2 : 1;
+  verboActual = "";
+  pronombreActual = "";
+  document.getElementById("verbo").innerText = "";
+  document.getElementById("respuesta").value = "";
+  document.getElementById("feedback").innerText = `⏱️ Tiempo terminado. Siguiente equipo.`;
+  iniciarTurno();
+}
+
+// Dado digital
+document.getElementById("dado").onclick = function(){
+  const dado = Math.floor(Math.random() * verbos.length);
+  verboActual = verbos[dado];
+  pronombreActual = pronombres[Math.floor(Math.random() * pronombres.length)];
+  document.getElementById("verbo").innerText = `Conjuga: ${pronombreActual} + ${verboActual}`;
+  document.getElementById("feedback").innerText = "";
+  document.getElementById("respuesta").value = "";
+};
+
+// Comprobar respuesta
+function checar(){
+  if(!verboActual) return;
+  const r = document.getElementById("respuesta").value.toLowerCase().trim();
+  const index = pronombres.indexOf(pronombreActual);
+  const equipo = `Equipo ${turno}`;
+  const correcto = r === conjugaciones[verboActual][index];
+
+  if(correcto){
+    puntosEquipos[equipo]++;
+    document.getElementById("feedback").innerText = `✅ ¡Correcto! +1 punto para ${equipo}`;
+    actualizarPuntos();
+    cambiarTurno();
+  } else {
+    document.getElementById("feedback").innerText = `❌ Intenta otra vez. Forma correcta: ${conjugaciones[verboActual][index]}`;
+  }
+}
+
+function actualizarPuntos(){
+  document.getElementById("puntos").innerHTML = 
+    `<span class="equipo1">Equipo 1: ${puntosEquipos["Equipo 1"]}</span> | <span class="equipo2">Equipo 2: ${puntosEquipos["Equipo 2"]}</span>`;
+}
+
+// Reconocimiento de voz
+function hablar(){
+  if(!('webkitSpeechRecognition' in window)){
+    alert("Tu navegador no soporta reconocimiento de voz");
+    return;
+  }
+  const recognition = new webkitSpeechRecognition();
+  recognition.lang = "es-ES";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  recognition.start();
+
+  recognition.onresult = function(event){
+    const voz = event.results[0][0].transcript.toLowerCase().trim();
+    document.getElementById("respuesta").value = voz;
+    checar();
+  };
+
+  recognition.onerror = function(){
+    document.getElementById("feedback").innerText = "Error de reconocimiento de voz. Intenta escribir.";
+  };
+}
+
+iniciarTurno();
+</script>
+
+</body>
+</html>
