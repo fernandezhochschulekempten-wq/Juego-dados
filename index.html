@@ -3,18 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <title>Juego de Verbos - Dado Digital</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body { font-family: sans-serif; text-align:center; margin:20px; }
-  h1 { color: #2c3e50; }
+  body { font-family: 'Poppins', sans-serif; text-align:center; margin:20px; background:#f5f5f5; color:#333; }
+  h1 { color: #1a73e8; margin-bottom:10px; }
   #instruccion { font-size:16px; margin-bottom:20px; }
-  #dado { font-size:60px; cursor:pointer; margin-top:10px; }
-  input { font-size:16px; padding:5px; margin-top:10px; }
-  button { font-size:16px; padding:5px 10px; margin-left:5px; }
+  #dado { font-size:70px; cursor:pointer; margin-top:10px; transition: transform 0.2s; }
+  #dado:hover { transform: scale(1.2); }
+  input { font-size:16px; padding:10px; margin-top:10px; border-radius:5px; border:1px solid #ccc; width:250px; }
+  button { font-size:16px; padding:8px 15px; margin-left:5px; border-radius:5px; border:none; background:#1a73e8; color:white; cursor:pointer; transition: background 0.2s; }
+  button:hover { background:#1558b0; }
   #feedback { font-size:18px; margin-top:10px; min-height:24px; }
   #puntos { font-size:20px; margin-top:20px; }
-  .equipo1 { color: blue; }
-  .equipo2 { color: red; }
-  #turno { font-size:18px; margin-top:10px; font-weight:bold; }
+  .equipo1 { color: #1a73e8; font-weight:600; }
+  .equipo2 { color: #e91e63; font-weight:600; }
+  #turno { font-size:18px; margin-top:10px; font-weight:600; }
+  #verbo { font-size:20px; margin-top:15px; font-weight:500; }
 </style>
 </head>
 <body>
@@ -22,7 +26,7 @@
 <h1>Juego Interactivo de Verbos (-AR)</h1>
 
 <p id="instruccion">
-<span style="font-weight:bold;">Anleitung auf Deutsch:</span> <br>
+<span style="font-weight:600;">Anleitung auf Deutsch:</span> <br>
 Jedes Team würfelt nacheinander mit dem Würfel 🎲. Ein Verb und ein Pronomen erscheinen. <br>
 Das Team muss das Verb korrekt im Präsens konjugieren. <br>
 Für richtige Antworten gibt es Punkte. Das Spiel wechselt automatisch zum nächsten Team. <br>
@@ -34,8 +38,8 @@ Antworten können während der gesamten Zeit versucht werden.
 <p id="verbo"></p>
 <input type="text" id="respuesta" placeholder="Escribe la conjugación">
 <button onclick="checar()">Comprobar</button>
-<button onclick="hablar()">🎤 Responder por voz</button>
 <p id="feedback"></p>
+
 <h3>Puntos por equipo</h3>
 <p id="puntos"><span class="equipo1">Equipo 1: 0</span> | <span class="equipo2">Equipo 2: 0</span></p>
 
@@ -74,7 +78,7 @@ function iniciarTurno(){
   },1000);
 }
 
-// Mostrar solución solo cuando termine el tiempo y cambiar turno
+// Mostrar solución solo al terminar el tiempo
 function mostrarSolucionYCambiarTurno(){
   clearInterval(timer);
   if(verboActual){
@@ -85,7 +89,6 @@ function mostrarSolucionYCambiarTurno(){
     document.getElementById("feedback").innerText = `⏱️ Tiempo terminado. Siguiente equipo.`;
   }
 
-  // Cambiar turno
   turno = turno === 1 ? 2 : 1;
   verboActual = "";
   pronombreActual = "";
@@ -108,7 +111,7 @@ document.getElementById("dado").onclick = function(){
   document.getElementById("respuesta").value = "";
 };
 
-// Comprobar respuesta (no mostrar solución hasta que termine el tiempo)
+// Comprobar respuesta
 function checar(){
   if(!verboActual) return;
   const r = document.getElementById("respuesta").value.toLowerCase().trim();
@@ -122,7 +125,7 @@ function checar(){
     actualizarPuntos();
     cambiarTurno();
   } else {
-    document.getElementById("feedback").innerText = `❌ Intenta otra vez`; // no mostrar solución todavía
+    document.getElementById("feedback").innerText = `❌ Intenta otra vez`; // no mostrar solución
   }
 }
 
@@ -144,30 +147,7 @@ function cambiarTurno(){
   iniciarTurno();
 }
 
-// Reconocimiento de voz
-function hablar(){
-  if(!('webkitSpeechRecognition' in window)){
-    alert("Tu navegador no soporta reconocimiento de voz");
-    return;
-  }
-  const recognition = new webkitSpeechRecognition();
-  recognition.lang = "es-ES";
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-  recognition.start();
-
-  recognition.onresult = function(event){
-    const voz = event.results[0][0].transcript.toLowerCase().trim();
-    document.getElementById("respuesta").value = voz;
-    checar();
-  };
-
-  recognition.onerror = function(){
-    document.getElementById("feedback").innerText = "Error de reconocimiento de voz. Intenta escribir.";
-  };
-}
-
-// Iniciar juego al cargar la página
+// Iniciar juego
 iniciarTurno();
 </script>
 
