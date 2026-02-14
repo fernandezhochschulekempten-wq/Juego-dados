@@ -25,7 +25,8 @@
 <span style="font-weight:bold;">Anleitung auf Deutsch:</span> <br>
 Jedes Team würfelt nacheinander mit dem Würfel 🎲. Ein Verb und ein Pronomen erscheinen. <br>
 Das Team muss das Verb korrekt im Präsens konjugieren. <br>
-Für richtige Antworten gibt es Punkte. Das Spiel wechselt automatisch zum nächsten Team.
+Für richtige Antworten gibt es Punkte. Das Spiel wechselt automatisch zum nächsten Team. <br>
+Antworten können während der gesamten Zeit versucht werden.
 </p>
 
 <p id="turno">Turno: Equipo 1</p>
@@ -59,7 +60,7 @@ let turno = 1;
 let tiempoRestante = 30;
 let timer;
 
-// Función para iniciar turno
+// Iniciar turno
 function iniciarTurno(){
   clearInterval(timer);
   tiempoRestante = 30;
@@ -73,7 +74,7 @@ function iniciarTurno(){
   },1000);
 }
 
-// Mostrar la solución y pasar turno
+// Mostrar solución solo cuando termine el tiempo y cambiar turno
 function mostrarSolucionYCambiarTurno(){
   clearInterval(timer);
   if(verboActual){
@@ -84,6 +85,7 @@ function mostrarSolucionYCambiarTurno(){
     document.getElementById("feedback").innerText = `⏱️ Tiempo terminado. Siguiente equipo.`;
   }
 
+  // Cambiar turno
   turno = turno === 1 ? 2 : 1;
   verboActual = "";
   pronombreActual = "";
@@ -106,7 +108,7 @@ document.getElementById("dado").onclick = function(){
   document.getElementById("respuesta").value = "";
 };
 
-// Comprobar respuesta
+// Comprobar respuesta (no mostrar solución hasta que termine el tiempo)
 function checar(){
   if(!verboActual) return;
   const r = document.getElementById("respuesta").value.toLowerCase().trim();
@@ -120,7 +122,7 @@ function checar(){
     actualizarPuntos();
     cambiarTurno();
   } else {
-    document.getElementById("feedback").innerText = `❌ Intenta otra vez. Forma correcta: ${conjugaciones[verboActual][index]}`;
+    document.getElementById("feedback").innerText = `❌ Intenta otra vez`; // no mostrar solución todavía
   }
 }
 
